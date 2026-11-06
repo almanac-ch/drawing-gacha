@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>結専用 構図ガチャ</title>
+<style>
+  :root{
+    --bg:#eef0f5;
+    --panel:#fcfcfd;
+    --ink:#2d3142;
+    --sub:#6a738b;
+    --accent:#8f5d5d;
+    --accent2:#c7b59b;
+    --line:#d8dce7;
+    --soft:#f4efe6;
+    --shadow:0 10px 30px rgba(32, 42, 65, .08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+    background:linear-gradient(180deg, #f3f5f9 0%, #eceff5 100%);
+    color:var(--ink);
+  }
+  .wrap{
+    max-width:980px;
+    margin:0 auto;
+    padding:18px 14px 40px;
+  }
+  .hero{
+    background:linear-gradient(135deg, rgba(199,181,155,.45), rgba(238,240,245,.95));
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:24px;
+    padding:18px 18px 16px;
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+  }
+  .hero h1{
+    margin:0 0 6px;
+    font-size:28px;
+    letter-spacing:.02em;
+  }
+  .hero p{
+    margin:4px 0;
+    color:var(--sub);
+    line-height:1.65;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:16px;
+  }
+  @media (min-width:860px){
+    .grid{
+      grid-template-columns: 360px 1fr;
+      align-items:start;
+    }
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(216,220,231,.9);
+    border-radius:22px;
+    padding:16px;
+    box-shadow:var(--shadow);
+  }
+  .panel h2{
+    font-size:18px;
+    margin:0 0 12px;
+  }
+  .row{margin-bottom:12px;}
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--sub);
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  select, button{
+    width:100%;
+    border-radius:14px;
+    border:1px solid var(--line);
+    padding:12px 14px;
+    font-size:15px;
+    background:#fff;
+    color:var(--ink);
+  }
+  select:focus, button:focus{outline:2px solid rgba(143,93,93,.22); outline-offset:1px;}
+  .checks{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .check{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fff;
+    min-height:54px;
+  }
+  .check input{margin-top:2px}
+  .check span{
+    font-size:14px;
+    color:var(--ink);
+    line-height:1.35;
+  }
+  .btns{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:8px;
+  }
+  .btn-main{
+    background:linear-gradient(135deg, #8f5d5d, #ad7e7e);
+    border:none;
+    color:#fff;
+    font-weight:700;
+  }
+  .btn-sub{
+    background:#fff;
+    color:var(--ink);
+  }
+  .btn-wide{
+    margin-top:10px;
+    background:linear-gradient(135deg, #c7b59b, #d8c9b3);
+    border:none;
+    color:#42372f;
+    font-weight:700;
+  }
+  .tag{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:999px;
+    background:var(--soft);
+    color:#6e5949;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  .outbox{
+    background:#f7f8fb;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .outbox h3{
+    margin:0 0 10px;
+    font-size:14px;
+    color:var(--sub);
+    letter-spacing:.03em;
+  }
+  .result-list{
+    display:grid;
+    gap:10px;
+  }
+  .item{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px;
+  }
+  .item strong{
+    display:block;
+    font-size:12px;
+    color:var(--sub);
+    margin-bottom:6px;
+    letter-spacing:.04em;
+  }
+  .item div{
+    font-size:16px;
+    line-height:1.55;
+  }
+  .prompt{
+    font-size:16px;
+    line-height:1.7;
+    white-space:pre-wrap;
+  }
+  .small{
+    font-size:13px;
+    color:var(--sub);
+    line-height:1.6;
+  }
+  .history{
+    display:grid;
+    gap:8px;
+  }
+  .history button{
+    text-align:left;
+    padding:12px;
+    font-size:13px;
+    line-height:1.45;
+    white-space:normal;
+  }
+  .foot{
+    margin-top:16px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    color:var(--sub);
+    font-size:13px;
+    line-height:1.7;
+  }
+  .mono{
+    font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="tag">ホーム画面に置いて1タップ用</div>
+    <h1>結専用 構図ガチャ</h1>
+    <p>牧瀬紅莉栖 / 岡部倫太郎を前提に、<b>構図・カメラ・演出・背景・小物</b>をランダム生成する簡易ガチャだ。</p>
+    <p>「描きたいものが出ない」時は、まず1回押す。<b>5分ラフを切るための発射台</b>として使う想定。</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>設定</h2>
+
+      <div class="row">
+        <label for="character">キャラ</label>
+        <select id="character">
+          <option value="kurisu">牧瀬紅莉栖</option>
+          <option value="okabe">岡部倫太郎</option>
+          <option value="random">ランダム（牧瀬 / 岡部）</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="difficulty">難易度</label>
+        <select id="difficulty">
+          <option value="easy">やさしめ（整理しやすい）</option>
+          <option value="normal" selected>ふつう</option>
+          <option value="hard">攻める（構図やパース強め）</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>入れる要素</label>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="useExpression" checked><span>表情</span></label>
+          <label class="check"><input type="checkbox" id="useBackground" checked><span>背景</span></label>
+          <label class="check"><input type="checkbox" id="useLighting" checked><span>光・時間帯</span></label>
+          <label class="check"><input type="checkbox" id="useProp" checked><span>小物</span></label>
+          <label class="check"><input type="checkbox" id="useMiniTask" checked><span>ミニ課題</span></label>
+          <label class="check"><input type="checkbox" id="useLayout" checked><span>レイアウト指示</span></label>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="btn-main" id="generateBtn">生成</button>
+        <button class="btn-sub" id="copyBtn">結果をコピー</button>
+      </div>
+
+      <button class="btn-wide" id="quickBtn">超ざっくり構図だけ生成</button>
+
+      <div class="foot">
+        <b>使い方のすすめ</b><br>
+        1. まず1回生成<br>
+        2. 気に入ったら <span class="mono">5分ラフ</span><br>
+        3. 気に入らなければ、もう一度生成する<br><br>
+        Webサイトとして公開した後、Safari の共有メニューから <b>「ホーム画面に追加」</b> で1タップ化できる。
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>出力</h2>
+
+      <div class="outbox">
+        <h3>ガチャ結果</h3>
+        <div class="result-list" id="resultList"></div>
+      </div>
+
+      <div class="outbox">
+        <h3>そのまま描き始める用テキスト</h3>
+        <div class="prompt" id="fullPrompt">まだ生成していない。</div>
+      </div>
+
+      <div class="outbox">
+        <h3>履歴</h3>
+        <div class="small">前に出た内容をもう一度使いたい時用。押すと再表示。</div>
+        <div class="history" id="history"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  characterNames: {
+    kurisu: "牧瀬紅莉栖",
+    okabe: "岡部倫太郎"
+  },
+
+  shot: {
+    easy: [
+      "立ちの全身。シルエットがきれいに抜ける正攻法",
+      "太ももまでの3/4ショット。手や髪で流れを作る",
+      "腰上の構図。上半身のひねりを見せる",
+      "座りの半身。脚の重なりと手の置き方を見せる",
+      "全身の正面寄り構図。服の皺と重心を整理して見せる"
+    ],
+    normal: [
+      "片足重心の全身。S字気味に流れるシルエット",
+      "歩きの途中を切り取った全身。裾や髪で動きを出す",
+      "振り返りの全身。顔だけ戻して視線を外す",
+      "椅子・ソファに浅く座る半身〜全身",
+      "肩越し気味の中距離ショット。顔と手の関係を見せる",
+      "腰をひねった全身。胴体と骨盤の向きをずらす"
+    ],
+    hard: [
+      "やや煽りの全身。手前の脚または手を大きめに見せる",
+      "俯瞰寄りの中距離。頭・肩・脚のリズムで見せる",
+      "足元から見上げる構図。長い脚と上体の角度を強調",
+      "座り込み＋片膝立て。奥行きのある重なり構図",
+      "手前の腕を大きく見せるパース強めの半身〜全身",
+      "フレーム外へ抜ける髪やコート裾を使った対角線構図"
+    ]
+  },
+
+  poseKurisu: {
+    easy: [
+      "片手を腰に当て、もう片方の腕は自然に下ろす",
+      "ネクタイ付近に軽く手を添える",
+      "カーディガンの裾をつまむ",
+      "まっすぐ立って重心だけ片側に寄せる",
+      "腕を組まず、手首だけ軽く曲げて知的に見せる"
+    ],
+    normal: [
+      "片手を差し出し、もう片方の手はポケットか腰付近",
+      "カーディガンを肩から落とし気味にして片手で支える",
+      "体を少し反らし、脇腹に抜けを作る",
+      "片脚を前に出し、上半身はやや後ろへ引く",
+      "顔は正面気味、体だけ斜めに流す",
+      "椅子や壁にもたれて脚を組み替える前の瞬間"
+    ],
+    hard: [
+      "手前の手を大きく、指先を見せる",
+      "歩き出す瞬間で、後ろ側の脚を長く抜く",
+      "髪を払う動作をしながら振り返る",
+      "片膝を曲げて高さ差を作り、上体は逆方向へ倒す",
+      "足元から見上げた時に映えるよう、腰を前へ出す",
+      "片手を大きく開き、もう片方で紙・メモ・ガジェットを持つ"
+    ]
+  },
+
+  poseOkabe: {
+    easy: [
+      "片手をポケット、もう片方の手は軽く上げる",
+      "白衣の前を軽くつまむ",
+      "腕を組まず、片手だけ顎や首筋に寄せる",
+      "立ったまま少し猫背気味に力を抜く",
+      "携帯電話や端末を持って様子を見る"
+    ],
+    normal: [
+      "コート裾または白衣を翻しながら歩く",
+      "片手を大きく広げ、もう片方は胸元へ",
+      "視線だけ鋭く横へ流し、体は正面気味",
+      "壁にもたれて足を組み、重心を崩す",
+      "片腕を高く上げて芝居がかったシルエットを作る",
+      "肩をすくめつつ、手元の端末を覗き込む"
+    ],
+    hard: [
+      "手前の腕を大きく見せて指先を強調する",
+      "足元からの煽りでマント・白衣・裾を広げる",
+      "半身をねじり、頭だけ逆方向へ向ける",
+      "しゃがみ〜立ち上がりの途中姿勢で不安定な重心を見せる",
+      "大きく一歩踏み出し、衣服で対角線を作る",
+      "片手を高く、片手を低く置いて縦の流れを作る"
+    ]
+  },
+
+  camera: {
+    easy: [
+      "目線に近い自然な高さ",
+      "やや上から見下ろす穏やかな角度",
+      "真正面ではなく少し斜め",
+      "顔が見やすい高さに固定"
+    ],
+    normal: [
+      "ややローアングル",
+      "やや俯瞰",
+      "肩の高さより少し下",
+      "顔より少し低い位置から見上げる",
+      "3/4ビューで奥行きを感じる角度"
+    ],
+    hard: [
+      "かなり低い位置からの煽り",
+      "高めの俯瞰で頭身差を強調",
+      "手前の手足が画面に飛び込む近距離カメラ",
+      "対角線構図を意識した斜め気味カメラ",
+      "一部がフレームからはみ出す近接構図"
+    ]
+  },
+
+  expressionKurisu: [
+    "冷静で少し呆れた顔",
+    "理屈っぽく見える真顔",
+    "うっすら不機嫌そうな目線",
+    "少しだけ驚いたがすぐ戻した顔",
+    "視線を外した静かな顔",
+    "勝ち気だけど感情を表に出しすぎない顔"
+  ],
+
+  expressionOkabe: [
+    "不敵な笑みの手前で止めた顔",
+    "真顔だがどこか芝居がかっている顔",
+    "視線だけ鋭く飛ばした顔",
+    "考え込んでいる顔",
+    "少し疲れた顔",
+    "テンションを抑えた静かな顔"
+  ],
+
+  background: [
+    "無地背景＋縦長長方形の色面だけ。人物メイン",
+    "研究室の一角。棚や機材は簡略化",
+    "秋葉原の路地。看板は情報量を抑える",
+    "ラジ館外観をかなり簡略化した背景",
+    "窓際の室内。外光だけ入る",
+    "夕方の歩道。奥はぼかす前提の簡易背景",
+    "階段や通路。直線で構図を支える",
+    "ソファのある室内。座り構図向け",
+    "白背景＋足元の楕円影＋細線だけ",
+    "幾何学モチーフ（六角形、細線、数字）を少しだけ置く"
+  ],
+
+  lighting: [
+    "昼のフラット光。色で整理しやすい",
+    "夕方の斜光。髪の縁に少し光",
+    "室内のやわらかい散光",
+    "逆光気味で輪郭だけ明るい",
+    "曇天の均一な光",
+    "上からの光で顔下に少し影",
+    "片側からだけ光が来るシンプルな明暗"
+  ],
+
+  propKurisu: [
+    "小さなメモ",
+    "スマホ",
+    "研究ノート",
+    "紙コップ",
+    "本",
+    "クリップ付きボード",
+    "イヤホン・小物ガジェット"
+  ],
+
+  propOkabe: [
+    "携帯電話",
+    "研究ノート",
+    "缶飲料",
+    "腕時計やガジェット",
+    "紙束",
+    "キーホルダーや小物",
+    "白衣の裾そのものを見せ場にする（小物なし）"
+  ],
+
+  layout: [
+    "人物は画面中央より少し左。右側に余白",
+    "人物を大きめに置いて頭上は詰め気味",
+    "足元は少し余裕を取り、楕円影を置く",
+    "縦長の色面を人物の背後に置く",
+    "上側のどこかに小さく数字や記号を入れる",
+    "配色見本の丸を3〜4個、端に縦並びで置く",
+    "髪の流れが余白側へ逃げるように配置する"
+  ],
+
+  miniTask: [
+    "脇・腕・胴体のあいだに抜けを1か所以上作る",
+    "顔は最後に詰める。先にシルエットを固める",
+    "手を片方だけでも丁寧に描く",
+    "服の皺は3か所だけ本気で入れ、それ以外は省略",
+    "髪束を『大・中・小』で整理して描く",
+    "太ももの流れを一本で説明できるようにする",
+    "背景は60点で止めて人物を優先する",
+    "ネクタイや裾で縦の流れを作る",
+    "頭・胸・腰の向きを少しずらす",
+    "顔の情報量より全体バランスを優先する"
+  ]
+};
+
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function getCharKey() {
+  const v = document.getElementById('character').value;
+  if (v === 'random') return Math.random() < 0.5 ? 'kurisu' : 'okabe';
+  return v;
+}
+
+function getDifficulty() {
+  return document.getElementById('difficulty').value;
+}
+
+function buildResult(quick=false) {
+  const charKey = getCharKey();
+  const charName = DATA.characterNames[charKey];
+  const difficulty = getDifficulty();
+  const isKurisu = charKey === 'kurisu';
+
+  const shot = rand(DATA.shot[difficulty]);
+  const pose = rand(isKurisu ? DATA.poseKurisu[difficulty] : DATA.poseOkabe[difficulty]);
+  const camera = rand(DATA.camera[difficulty]);
+
+  const result = {
+    "キャラ": charName,
+    "構図": shot,
+    "ポーズ": pose,
+    "カメラ": camera
+  };
+
+  if (!quick && document.getElementById('useExpression').checked) {
+    result["表情"] = rand(isKurisu ? DATA.expressionKurisu : DATA.expressionOkabe);
+  }
+  if (!quick && document.getElementById('useBackground').checked) {
+    result["背景"] = rand(DATA.background);
+  }
+  if (!quick && document.getElementById('useLighting').checked) {
+    result["光"] = rand(DATA.lighting);
+  }
+  if (!quick && document.getElementById('useProp').checked) {
+    result["小物"] = rand(isKurisu ? DATA.propKurisu : DATA.propOkabe);
+  }
+  if (!quick && document.getElementById('useLayout').checked) {
+    result["レイアウト"] = rand(DATA.layout);
+  }
+  if (!quick && document.getElementById('useMiniTask').checked) {
+    result["ミニ課題"] = rand(DATA.miniTask);
+  }
+
+  return result;
+}
+
+function resultToPrompt(obj) {
+  const lines = [];
+  lines.push(`${obj["キャラ"]}を描く。`);
+  lines.push(`主題は「${obj["構図"]}」。`);
+  lines.push(`ポーズは「${obj["ポーズ"]}」、カメラは「${obj["カメラ"]}」。`);
+  if (obj["表情"]) lines.push(`表情は「${obj["表情"]}」。`);
+  if (obj["背景"]) lines.push(`背景は「${obj["背景"]}」。`);
+  if (obj["光"]) lines.push(`光は「${obj["光"]}」。`);
+  if (obj["小物"]) lines.push(`小物は「${obj["小物"]}」。`);
+  if (obj["レイアウト"]) lines.push(`レイアウトは「${obj["レイアウト"]}」。`);
+  if (obj["ミニ課題"]) lines.push(`意識することは「${obj["ミニ課題"]}」。`);
+  lines.push("");
+  lines.push("まずは5分ラフで、シルエットと重心だけ先に決める。");
+  return lines.join("\n");
+}
+
+function renderResult(obj) {
+  const area = document.getElementById('resultList');
+  area.innerHTML = "";
+  Object.entries(obj).forEach(([k,v]) => {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = `<strong>${k}</strong><div>${v}</div>`;
+    area.appendChild(item);
+  });
+  document.getElementById('fullPrompt').textContent = resultToPrompt(obj);
+}
+
+function saveHistory(obj) {
+  const item = {
+    data: obj,
+    time: new Date().toLocaleString('ja-JP')
+  };
+  const hist = JSON.parse(localStorage.getItem('yu_gacha_history') || '[]');
+  hist.unshift(item);
+  localStorage.setItem('yu_gacha_history', JSON.stringify(hist.slice(0, 8)));
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = JSON.parse(localStorage.getItem('yu_gacha_history') || '[]');
+  const box = document.getElementById('history');
+  box.innerHTML = "";
+  if (hist.length === 0) {
+    box.innerHTML = '<div class="small">まだ履歴はない。</div>';
+    return;
+  }
+  hist.forEach((h) => {
+    const b = document.createElement('button');
+    b.className = 'btn-sub';
+    b.innerHTML = `<b>${h.data["キャラ"]}</b> / ${h.data["構図"]}<br><span class="small">${h.time}</span>`;
+    b.onclick = () => renderResult(h.data);
+    box.appendChild(b);
+  });
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const obj = buildResult(false);
+  renderResult(obj);
+  saveHistory(obj);
+});
+
+document.getElementById('quickBtn').addEventListener('click', () => {
+  const obj = buildResult(true);
+  renderResult(obj);
+  saveHistory(obj);
+});
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const text = document.getElementById('fullPrompt').textContent.trim();
+  if (!text || text === "まだ生成していない。") return;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copyBtn');
+    const prev = btn.textContent;
+    btn.textContent = 'コピーした';
+    setTimeout(() => btn.textContent = prev, 1200);
+  } catch (e) {
+    alert("コピーに失敗した。長押しで手動コピーしてくれ。");
+  }
+});
+
+renderHistory();
+</script>
+</body>
+</html>
